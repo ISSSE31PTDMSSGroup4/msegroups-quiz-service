@@ -56,7 +56,6 @@ def getQuizDetail():
 @app.route('/api/quiz', methods=['POST'])
 def createQuiz():
     authorized = True
-    badRequest = False
     username = 'Susan'
 
     if not authorized:
@@ -69,12 +68,12 @@ def createQuiz():
 
     jsonBody = request.json 
 
-    if jsonBody is None or badRequest:
-        return '''
-            Bad request due to
-            1) Wrong parameter
-            2) Missing/Wrong key (“title” <- write wrongly)
-        ''', 400
+    if jsonBody is None:
+        return 'Bad request due to wrong parameter', 400
+    
+    if keys.QUIZ_ID.value in jsonBody or \
+        keys.TITLE.value not in jsonBody:
+        return 'Bad request due to missing/wrong key', 400
 
     import hashlib
     from datetime import datetime
@@ -86,7 +85,7 @@ def createQuiz():
         uuid,
         jsonBody[keys.TITLE.value],
         jsonBody[keys.QUESTIONS.value],
-        jsonBody[keys.REMARK.value]
+        jsonBody[keys.REMARK.value] if keys.REMARK.value in jsonBody else ''
     )
 
     return 'Successful', 200
@@ -94,7 +93,6 @@ def createQuiz():
 @app.route('/api/quiz', methods=['PUT'])
 def updateQuiz():
     authorized = True
-    badRequest = False
     username = 'Susan'
 
     if not authorized:
@@ -107,12 +105,11 @@ def updateQuiz():
 
     jsonBody = request.json 
 
-    if jsonBody is None or badRequest:
-        return '''
-            Bad request due to
-            1) Wrong parameter
-            2) Missing/Wrong key (“title” <- write wrongly)
-        ''', 400
+    if jsonBody is None:
+        return 'Bad request due to wrong parameter', 400
+    
+    if keys.QUIZ_ID.value not in jsonBody:
+        return 'Bad request due to missing/wrong key', 400
 
     dynamodb_handler.updateQuiz(
         username,
@@ -121,9 +118,6 @@ def updateQuiz():
     )
         
     return 'Successful', 200
-
-        
-
 
 @app.route('/api/quiz/{quiz_id}/question/{question_id}', methods=['POST', 'PUT'])
 def updateQuestion():
