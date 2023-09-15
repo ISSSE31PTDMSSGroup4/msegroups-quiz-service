@@ -60,3 +60,14 @@ def updateQuiz(username: str, quiz_id: str, inputItem: dict) -> dict:
         'Title': titleResponse,
         'Remark': remarkResponse
     }
+
+def addQuestion(username: str, quiz_id: str, question_id: str, inputItem: dict) -> dict:
+    response = QuizTable.update_item(
+        Key={keys.USERNAME.value: username, keys.QUIZ_ID.value: quiz_id},
+        UpdateExpression = "SET #attrName = list_append(#attrName, :attrValue)",
+        ExpressionAttributeNames = {"#attrName" : keys.QUESTIONS.value},
+        ExpressionAttributeValues = {":attrValue" : [inputItem]},
+        ReturnValues="UPDATED_NEW"
+    )
+
+    return response
