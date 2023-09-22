@@ -71,3 +71,68 @@ def addQuestion(username: str, quiz_id: str, question_id: str, inputItem: dict) 
     )
 
     return response
+
+def updateQuestion(username: str, quiz_id: str, inputItem: dict) -> dict:
+    indexResponse = 'N/A'
+    optionsResponse = 'N/A'
+    answerResponse = 'N/A'
+    explanationResponse = 'N/A'
+
+    if keys.INDEX.value in inputItem:
+        indexResponse = QuizTable.update_item(
+            Key={keys.USERNAME.value: username, keys.QUIZ_ID.value: quiz_id},
+            UpdateExpression="SET #questions.#question_id.#question_index = :question_index",
+            ExpressionAttributeNames={
+                '#questions': keys.QUESTIONS.value,
+                '#question_id': inputItem[keys.QUESTION_ID.value],
+                '#question_index': keys.INDEX.value
+            },
+            ExpressionAttributeValues={':question_index': inputItem[keys.INDEX.value]},
+            ReturnValues="UPDATED_NEW"
+        )
+    
+    if keys.OPTIONS.value in inputItem:
+        optionsResponse = QuizTable.update_item(
+            Key={keys.USERNAME.value: username, keys.QUIZ_ID.value: quiz_id},
+            UpdateExpression="SET #questions.#question_id.#options = :options",
+            ExpressionAttributeNames={
+                '#questions': keys.QUESTIONS.value,
+                '#question_id': inputItem[keys.QUESTION_ID.value],
+                '#options': keys.OPTIONS.value
+            },
+            ExpressionAttributeValues={':options': inputItem[keys.OPTIONS.value]},
+            ReturnValues="UPDATED_NEW"
+        )
+    
+    if keys.ANSWER.value in inputItem:
+        answerResponse = QuizTable.update_item(
+            Key={keys.USERNAME.value: username, keys.QUIZ_ID.value: quiz_id},
+            UpdateExpression="SET #questions.#question_id.#answer = :answer",
+            ExpressionAttributeNames={
+                '#questions': keys.QUESTIONS.value,
+                '#question_id': inputItem[keys.QUESTION_ID.value],
+                '#answer': keys.ANSWER.value
+            },
+            ExpressionAttributeValues={':answer': inputItem[keys.ANSWER.value]},
+            ReturnValues="UPDATED_NEW"
+        )
+    
+    if keys.EXPLANATION.value in inputItem:
+        explanationResponse = QuizTable.update_item(
+            Key={keys.USERNAME.value: username, keys.QUIZ_ID.value: quiz_id},
+            UpdateExpression="SET #questions.#question_id.#explanation = :explanation",
+            ExpressionAttributeNames={
+                '#questions': keys.QUESTIONS.value,
+                '#question_id': inputItem[keys.QUESTION_ID.value],
+                '#explanation': keys.EXPLANATION.value
+            },
+            ExpressionAttributeValues={':explanation': inputItem[keys.EXPLANATION.value]},
+            ReturnValues="UPDATED_NEW"
+        )
+    
+    return {
+        'Index': indexResponse,
+        'Options': optionsResponse,
+        'Answer': answerResponse,
+        'Explanation': explanationResponse
+    }

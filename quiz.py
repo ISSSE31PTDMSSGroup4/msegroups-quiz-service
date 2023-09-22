@@ -56,7 +56,7 @@ def getQuizDetail():
 @app.route('/api/quiz', methods=['POST'])
 def createQuiz():
     authorized = True
-    username = 'Susan'
+    username = 'Derby'
 
     if not authorized:
         return 'Authorization failed', 401
@@ -80,16 +80,17 @@ def createQuiz():
     s = jsonBody[keys.TITLE.value] + str(datetime.now().timestamp())
     uuid = hashlib.shake_256(s.encode('utf-8')).hexdigest(4)
 
+    question_map = {}
     for question in jsonBody[keys.QUESTIONS.value]:
-        s = jsonBody[keys.TITLE.value] + str(datetime.now().timestamp())
+        s = str(question[keys.INDEX.value]) + str(datetime.now().timestamp())
         question_id = hashlib.shake_256(s.encode('utf-8')).hexdigest(2)
-        question[keys.QUESTION_ID.value] = question_id
+        question_map[question_id] = question
 
     dynamodb_handler.addNewQuiz(
         username,
         uuid,
         jsonBody[keys.TITLE.value],
-        jsonBody[keys.QUESTIONS.value],
+        question_map,
         jsonBody[keys.REMARK.value] if keys.REMARK.value in jsonBody else ''
     )
 
@@ -163,61 +164,35 @@ def createQuestion():
 
     return 'Successful', 200
 
-@app.route('/api/quiz/{quiz_id}/question/{question_id}', methods=['POST', 'PUT'])
+@app.route('/api/quiz/question', methods=['PUT'])
 def updateQuestion():
     authorized = True
-    badRequest = False
+    username = 'Derby'
 
     if not authorized:
         return 'Authorization failed', 401
     
-    if badRequest:
-        return '''
-            Bad request due to
-            1) Wrong parameter
-            2) Missing/Wrong key (“title” <- write wrongly)
-        ''', 400
+    content_type = request.headers.get('Content-Type')
+    
+    if (content_type != 'application/json'):
+        return 'Content-Type not supported!'
+
+    jsonBody = request.json 
+
+    if jsonBody is None:
+        return 'Bad request due to wrong parameter', 400
+    
+    if keys.QUIZ_ID.value not in jsonBody or \
+        keys.QUESTION_ID.value not in jsonBody:
+        return 'Bad request due to missing/wrong key', 400
+    
+    dynamodb_handler.updateQuestion(
+        username,
+        jsonBody[keys.QUIZ_ID.value],
+        jsonBody
+    )
 
     return 'Successful', 200
-
-# @app.route('/api/quiz/{quiz_id}/question', methods=['POST'])
-# def createQuestion():
-#     authorized = True
-#     badRequest = False
-
-#     if not authorized:
-#         return 'Authorization failed', 401
-    
-#     if badRequest:
-#         return '''
-#             Bad request due to
-#             1) Wrong parameter
-#             2) Missing/Wrong key (“title” <- write wrongly)
-#         ''', 400
-
-#     return '''
-#         {“title”: “Solution Architect”,
-#             “Question1_id”: {
-#                 “Title”: “Useful diagram”,
-#                 “Option”: [“sequence_diagram”, “class_diagram”, “activity_diagram”, “all”],
-#                 “Answer”: 3,
-#                 “Explanation”: “...”
-#                 },
-#             “Question2_id”: {
-#                 “Title”: “Reference architecture design”,
-#                 “Option”: [...],
-#                 “Answer”: 1,
-#                 “Explanation”: .”...”
-#             },
-#             “Question3_id”: {
-#                 “Title”: “Type of Agile practice”,
-#                 “Option”: [...],
-#                 “Answer”: 1,
-#                 “Explanation”: .”...”     
-#             }
-#         }
-#     ''', 200
-
 
 if __name__ == '__main__':
     app.run()
