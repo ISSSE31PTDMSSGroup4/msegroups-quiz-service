@@ -15,43 +15,52 @@ def index():
 def getQuizzesCreatedByUser():
     # username = request.args.get('username')
     authorized = True
+    username = 'Derby'
 
-    if authorized:
-        return '''
-            {“Quiz_A_id”: 
-                {“title”: “Solution Architect”,
-                “Question_list”: [“Question1_id”, “Question2_id”]
-                “remark”: “This quiz iis about testing the knowledge of the Solution Architect fundamentals”,
-                },
-            “Quiz_B_id”: ……
-            }
-        ''', 200
-    
-    return 'Authorization failed', 401
+    if not authorized:
+        return 'Authorization failed', 401
 
-@app.route('/api/quiz/detail?{quiz_id}', methods=['GET'])
+    quizzes = dynamodb_handler.getQuizzesByUsername(username)
+
+    for quiz in quizzes:
+        quiz.pop(keys.USERNAME.value)
+        print (quiz[keys.QUESTIONS.value])
+        question_list = []
+        for question_id in quiz[keys.QUESTIONS.value]:
+            question_list.append(
+                {
+                  keys.QUESTION_ID.value : question_id  
+                }
+            )
+        quiz[keys.QUESTIONS.value] = question_list
+
+    return quizzes, 200
+
+@app.route("/api/quiz/detail", methods=['GET'])
 def getQuizDetail():
+    # username = request.args.get('username')
     authorized = True
+    username = 'Derby'
+    quiz_id = request.args.get('quiz_id', None)
 
-    if authorized:
-        return '''
-            {“title”: “Solution Architect”,
-            “Question1_id”: {
-                “Title”: “Useful diagram”,
-                “Option”: [“sequence_diagram”, “class_diagram”, “activity_diagram”, “all”],
-                “Answer”: 3,
-                “Explanation”: “...”
-                },
-            “Question2_id”: {
-                “Title”: “Reference architecture design”,
-                “Option”: [...],
-                “Answer”: 1,
-                “Explanation”: .”...”
-            }
-        }
-        ''', 200
+    if not authorized:
+        return 'Authorization failed', 401
+
+    quiz = dynamodb_handler.getQuiz(username, quiz_id)
+
+    quiz.pop(keys.USERNAME.value)
+
+    question_list = []
+    for question in quiz[keys.QUESTIONS.value]:
+        question_id = {keys.QUESTION_ID.value: question}
+        question_detail = quiz[keys.QUESTIONS.value][question]
+        question_detail.update(question_id)
+
+        question_list.append(question_detail)
     
-    return 'Authorization failed', 401
+    quiz[keys.QUESTIONS.value] = question_list
+
+    return quiz, 200
 
 @app.route('/api/quiz', methods=['POST'])
 def createQuiz():

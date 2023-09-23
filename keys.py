@@ -5,6 +5,7 @@ class keys(Enum):
     QUIZ_ID = 'quiz_id'
     TITLE = 'title'
     REMARK = 'remark'
+    QUESTION = 'question'
     QUESTIONS = 'questions'
     INDEX = 'index'
     QUESTION_ID = 'question_id'

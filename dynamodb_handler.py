@@ -22,6 +22,20 @@ resource = boto3.resource(
 
 QuizTable = resource.Table('Quiz')
 
+def getQuizzesByUsername(username):
+    response = QuizTable.query(
+        KeyConditionExpression="#username = :username",
+        ExpressionAttributeNames = {"#username" : keys.USERNAME.value},
+        ExpressionAttributeValues = {":username" : username},
+    )
+    return response["Items"]
+
+def getQuiz(username, quiz_id):
+    response = QuizTable.get_item(
+        Key={keys.USERNAME.value: username, keys.QUIZ_ID.value: quiz_id}
+    )
+    return response["Item"]
+
 def addNewQuiz(username, quiz_id, title, questions, remark):
     response = QuizTable.put_item(
         Item = {
