@@ -1,21 +1,25 @@
-from flask import Flask, json
+from flask import Flask, json, jsonify
 import dynamodb_handler
 from flask import request
-
 from keys import keys
 
-app = Flask(__name__)
+from flask_jwt_extended import get_jwt_identity, jwt_required
 
+app = Flask(__name__)
 
 @app.route('/')
 def index():
     return "This is the main page."
 
+@jwt_required()
+def user():
+  return get_jwt_identity()
+
 @app.route('/api/quiz/list/', methods=['GET'])
 def getQuizzesCreatedByUser():
     # username = request.args.get('username')
     authorized = True
-    username = 'Derby'
+    username = 'Sha'
 
     if not authorized:
         return 'Authorization failed', 401
@@ -40,7 +44,7 @@ def getQuizzesCreatedByUser():
 def getQuizDetail():
     # username = request.args.get('username')
     authorized = True
-    username = 'Derby'
+    username = 'Sha'
     quiz_id = request.args.get('quiz_id', None)
 
     if not authorized:
@@ -65,7 +69,8 @@ def getQuizDetail():
 @app.route('/api/quiz', methods=['POST'])
 def createQuiz():
     authorized = True
-    username = 'Derby'
+    # username = user()
+    username = 'Sha'
 
     if not authorized:
         return 'Authorization failed', 401
@@ -108,7 +113,7 @@ def createQuiz():
 @app.route('/api/quiz', methods=['PUT'])
 def updateQuiz():
     authorized = True
-    username = 'Susan'
+    username = 'Sha'
 
     if not authorized:
         return 'Authorization failed', 401
@@ -137,7 +142,7 @@ def updateQuiz():
 @app.route('/api/quiz', methods=['DELETE'])
 def deleteQuiz():
     authorized = True
-    username = 'Susan'
+    username = 'Sha'
 
     if not authorized:
         return 'Authorization failed', 401
@@ -165,7 +170,7 @@ def deleteQuiz():
 @app.route('/api/quiz/question', methods=['POST'])
 def addQuestion():
     authorized = True
-    username = 'Derby'
+    username = 'Sha'
 
     if not authorized:
         return 'Authorization failed', 401
@@ -204,7 +209,7 @@ def addQuestion():
 @app.route('/api/quiz/question', methods=['PUT'])
 def updateQuestion():
     authorized = True
-    username = 'Derby'
+    username = 'Sha'
 
     if not authorized:
         return 'Authorization failed', 401
@@ -234,7 +239,7 @@ def updateQuestion():
 @app.route('/api/quiz/question', methods=['DELETE'])
 def deleteQuestion():
     authorized = True
-    username = 'Derby'
+    username = 'Sha'
 
     if not authorized:
         return 'Authorization failed', 401
