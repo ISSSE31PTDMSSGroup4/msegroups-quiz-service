@@ -85,9 +85,12 @@ def deleteQuiz(username: str, quiz_id: str) -> dict:
 def addQuestion(username: str, quiz_id: str, question_id: str, inputItem: dict) -> dict:
     response = QuizTable.update_item(
         Key={keys.USERNAME.value: username, keys.QUIZ_ID.value: quiz_id},
-        UpdateExpression = "SET #attrName = list_append(#attrName, :attrValue)",
-        ExpressionAttributeNames = {"#attrName" : keys.QUESTIONS.value},
-        ExpressionAttributeValues = {":attrValue" : [inputItem]},
+        UpdateExpression = "SET #questions.#question_id = :question",
+            ExpressionAttributeNames={
+                '#questions': keys.QUESTIONS.value,
+                '#question_id': question_id
+            },
+            ExpressionAttributeValues={':question': inputItem},
         ReturnValues="UPDATED_NEW"
     )
 
@@ -96,6 +99,7 @@ def addQuestion(username: str, quiz_id: str, question_id: str, inputItem: dict) 
 def updateQuestion(username: str, quiz_id: str, inputItem: dict) -> dict:
     indexResponse = 'N/A'
     optionsResponse = 'N/A'
+    questionResponse = 'N/A'
     answerResponse = 'N/A'
     explanationResponse = 'N/A'
 
@@ -122,6 +126,19 @@ def updateQuestion(username: str, quiz_id: str, inputItem: dict) -> dict:
                 '#options': keys.OPTIONS.value
             },
             ExpressionAttributeValues={':options': inputItem[keys.OPTIONS.value]},
+            ReturnValues="UPDATED_NEW"
+        )
+
+    if keys.QUESTION.value in inputItem:
+        questionResponse = QuizTable.update_item(
+            Key={keys.USERNAME.value: username, keys.QUIZ_ID.value: quiz_id},
+            UpdateExpression="SET #questions.#question_id.#answer = :answer",
+            ExpressionAttributeNames={
+                '#questions': keys.QUESTIONS.value,
+                '#question_id': inputItem[keys.QUESTION_ID.value],
+                '#question': keys.QUESTION.value
+            },
+            ExpressionAttributeValues={':question': inputItem[keys.QUESTION.value]},
             ReturnValues="UPDATED_NEW"
         )
     
@@ -154,6 +171,7 @@ def updateQuestion(username: str, quiz_id: str, inputItem: dict) -> dict:
     return {
         'Index': indexResponse,
         'Options': optionsResponse,
+        'Question': questionResponse,
         'Answer': answerResponse,
         'Explanation': explanationResponse
     }

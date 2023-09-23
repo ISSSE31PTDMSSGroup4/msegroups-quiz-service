@@ -163,9 +163,9 @@ def deleteQuiz():
     return 'Successful', 200
 
 @app.route('/api/quiz/question', methods=['POST'])
-def createQuestion():
+def addQuestion():
     authorized = True
-    username = 'Susan'
+    username = 'Derby'
 
     if not authorized:
         return 'Authorization failed', 401
@@ -181,6 +181,7 @@ def createQuestion():
         return 'Bad request due to wrong parameter', 400
     
     if keys.QUIZ_ID.value not in jsonBody or \
+        keys.QUESTION.value not in jsonBody or \
         keys.INDEX.value not in jsonBody or \
         keys.OPTIONS.value not in jsonBody or \
         keys.ANSWER.value not in jsonBody:
@@ -190,12 +191,11 @@ def createQuestion():
     from datetime import datetime
     s = str(jsonBody[keys.INDEX.value]) + str(datetime.now().timestamp())
     question_id = hashlib.shake_256(s.encode('utf-8')).hexdigest(2)
-    
-    jsonBody[keys.QUESTION_ID.value] = question_id
-    jsonBody.pop(keys.QUIZ_ID.value)
+
     dynamodb_handler.addQuestion(
         username,
-        jsonBody[keys.QUIZ_ID.value],
+        jsonBody.pop(keys.QUIZ_ID.value),
+        question_id,
         jsonBody
     )
 
