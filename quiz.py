@@ -134,6 +134,34 @@ def updateQuiz():
         
     return 'Successful', 200
 
+@app.route('/api/quiz', methods=['DELETE'])
+def deleteQuiz():
+    authorized = True
+    username = 'Susan'
+
+    if not authorized:
+        return 'Authorization failed', 401
+    
+    content_type = request.headers.get('Content-Type')
+    
+    if (content_type != 'application/json'):
+        return 'Content-Type not supported!'
+
+    jsonBody = request.json 
+
+    if jsonBody is None:
+        return 'Bad request due to wrong parameter', 400
+    
+    if keys.QUIZ_ID.value not in jsonBody:
+        return 'Bad request due to missing/wrong key', 400
+
+    dynamodb_handler.deleteQuiz(
+        username,
+        jsonBody[keys.QUIZ_ID.value],
+    )
+        
+    return 'Successful', 200
+
 @app.route('/api/quiz/question', methods=['POST'])
 def createQuestion():
     authorized = True
@@ -199,6 +227,36 @@ def updateQuestion():
         username,
         jsonBody[keys.QUIZ_ID.value],
         jsonBody
+    )
+
+    return 'Successful', 200
+
+@app.route('/api/quiz/question', methods=['DELETE'])
+def deleteQuestion():
+    authorized = True
+    username = 'Derby'
+
+    if not authorized:
+        return 'Authorization failed', 401
+    
+    content_type = request.headers.get('Content-Type')
+    
+    if (content_type != 'application/json'):
+        return 'Content-Type not supported!'
+
+    jsonBody = request.json 
+
+    if jsonBody is None:
+        return 'Bad request due to wrong parameter', 400
+    
+    if keys.QUIZ_ID.value not in jsonBody or \
+        keys.QUESTION_ID.value not in jsonBody:
+        return 'Bad request due to missing/wrong key', 400
+    
+    dynamodb_handler.deleteQuestion(
+        username,
+        jsonBody[keys.QUIZ_ID.value],
+        jsonBody[keys.QUESTION_ID.value]
     )
 
     return 'Successful', 200

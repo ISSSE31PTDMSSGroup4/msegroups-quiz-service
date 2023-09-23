@@ -75,6 +75,13 @@ def updateQuiz(username: str, quiz_id: str, inputItem: dict) -> dict:
         'Remark': remarkResponse
     }
 
+def deleteQuiz(username: str, quiz_id: str) -> dict:
+    response = QuizTable.delete_item(
+        Key={keys.USERNAME.value: username, keys.QUIZ_ID.value: quiz_id},
+    )
+
+    return response
+
 def addQuestion(username: str, quiz_id: str, question_id: str, inputItem: dict) -> dict:
     response = QuizTable.update_item(
         Key={keys.USERNAME.value: username, keys.QUIZ_ID.value: quiz_id},
@@ -150,3 +157,16 @@ def updateQuestion(username: str, quiz_id: str, inputItem: dict) -> dict:
         'Answer': answerResponse,
         'Explanation': explanationResponse
     }
+
+def deleteQuestion(username: str, quiz_id: str, question_id: dict) -> dict:
+    response = QuizTable.update_item(
+        Key={keys.USERNAME.value: username, keys.QUIZ_ID.value: quiz_id},
+        UpdateExpression = "REMOVE #questions.#question_id",
+        ExpressionAttributeNames = {
+            "#questions" : keys.QUESTIONS.value,
+            "#question_id" : question_id,
+        },
+        ReturnValues="UPDATED_NEW"
+    )
+
+    return response
