@@ -3,17 +3,11 @@ import dynamodb_handler
 from flask import request
 from keys import keys
 
-from flask_jwt_extended import get_jwt_identity, jwt_required
-
 app = Flask(__name__)
 
 @app.route('/')
 def index():
     return "This is the main page."
-
-@jwt_required()
-def user():
-  return get_jwt_identity()
 
 @app.route('/api/quiz/list/', methods=['GET'])
 def getQuizzesCreatedByUser():
@@ -69,7 +63,6 @@ def getQuizDetail():
 @app.route('/api/quiz', methods=['POST'])
 def createQuiz():
     authorized = True
-    # username = user()
     username = 'Sha'
 
     if not authorized:
@@ -267,4 +260,4 @@ def deleteQuestion():
     return 'Successful', 200
 
 if __name__ == '__main__':
-    app.run()
+    app.run(host='0.0.0.0')
