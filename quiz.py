@@ -1,263 +1,196 @@
-from flask import Flask, json, jsonify
+from flask import Flask
 import dynamodb_handler
 from flask import request
-from keys import keys
+
+import hashlib
+from datetime import datetime
+
+import HTTPConst.response.status as status
+import HTTPConst.request.keys as keys
+import HTTPConst.response.message as response
 
 app = Flask(__name__)
 
-@app.route('/')
-def index():
-    return "This is the main page."
+def getUser():
+    return request.headers.get('X-USER')
+
+def genHash(value, length):
+    s = str(value) + str(datetime.now().timestamp())
+    return hashlib.shake_256(s.encode('utf-8')).hexdigest(length//2)
+
+@app.before_request
+def validateRequest():
+    username = getUser()
+    if not username:
+        return response.auth_failed()
+    
+    if request.method == 'GET':
+        return
+    
+    content_type = request.headers.get('Content-Type') 
+    if (content_type != 'application/json'):
+        return 'Content-Type not supported!'
+
+    if request.json is None:
+        return response.wrong_param()
 
 @app.route('/api/quiz/list/', methods=['GET'])
 def getQuizzesCreatedByUser():
-    # username = request.args.get('username')
-    authorized = True
-    username = 'Sha'
-
-    if not authorized:
-        return 'Authorization failed', 401
+    username = getUser()
 
     quizzes = dynamodb_handler.getQuizzesByUsername(username)
 
     for quiz in quizzes:
-        quiz.pop(keys.USERNAME.value)
-        print (quiz[keys.QUESTIONS.value])
+        quiz.pop(keys.USERNAME)
+        print (quiz[keys.QUESTIONS])
         question_list = []
-        for question_id in quiz[keys.QUESTIONS.value]:
+        for question_id in quiz[keys.QUESTIONS]:
             question_list.append(
                 {
-                  keys.QUESTION_ID.value : question_id  
+                  keys.QUESTION_ID : question_id  
                 }
             )
-        quiz[keys.QUESTIONS.value] = question_list
+        quiz[keys.QUESTIONS] = question_list
 
-    return quizzes, 200
+    return quizzes
 
 @app.route("/api/quiz/detail", methods=['GET'])
 def getQuizDetail():
-    # username = request.args.get('username')
-    authorized = True
-    username = 'Sha'
+    username = getUser()
+
     quiz_id = request.args.get('quiz_id', None)
-
-    if not authorized:
-        return 'Authorization failed', 401
-
     quiz = dynamodb_handler.getQuiz(username, quiz_id)
 
-    quiz.pop(keys.USERNAME.value)
+    quiz.pop(keys.USERNAME)
 
     question_list = []
-    for question in quiz[keys.QUESTIONS.value]:
-        question_id = {keys.QUESTION_ID.value: question}
-        question_detail = quiz[keys.QUESTIONS.value][question]
+    for question in quiz[keys.QUESTIONS]:
+        question_id = {keys.QUESTION_ID: question}
+        question_detail = quiz[keys.QUESTIONS][question]
         question_detail.update(question_id)
 
         question_list.append(question_detail)
     
-    quiz[keys.QUESTIONS.value] = question_list
+    quiz[keys.QUESTIONS] = question_list
 
-    return quiz, 200
+    return quiz
 
 @app.route('/api/quiz', methods=['POST'])
 def createQuiz():
-    authorized = True
-    username = 'Sha'
-
-    if not authorized:
-        return 'Authorization failed', 401
-    
-    content_type = request.headers.get('Content-Type')
-    
-    if (content_type != 'application/json'):
-        return 'Content-Type not supported!'
-
+    username = getUser()
     jsonBody = request.json 
-
-    if jsonBody is None:
-        return 'Bad request due to wrong parameter', 400
     
-    if keys.QUIZ_ID.value in jsonBody or \
-        keys.TITLE.value not in jsonBody:
-        return 'Bad request due to missing/wrong key', 400
+    if keys.QUIZ_ID in jsonBody or \
+        keys.TITLE not in jsonBody:
+        return response.wrong_key()
 
-    import hashlib
-    from datetime import datetime
-    s = jsonBody[keys.TITLE.value] + str(datetime.now().timestamp())
-    uuid = hashlib.shake_256(s.encode('utf-8')).hexdigest(4)
+    uuid = genHash(jsonBody[keys.TITLE], 8)
 
     question_map = {}
-    for question in jsonBody[keys.QUESTIONS.value]:
-        s = str(question[keys.INDEX.value]) + str(datetime.now().timestamp())
-        question_id = hashlib.shake_256(s.encode('utf-8')).hexdigest(2)
+    for question in jsonBody[keys.QUESTIONS]:
+        question_id = genHash(question[keys.INDEX], 4)
         question_map[question_id] = question
 
     dynamodb_handler.addNewQuiz(
         username,
         uuid,
-        jsonBody[keys.TITLE.value],
+        jsonBody[keys.TITLE],
         question_map,
-        jsonBody[keys.REMARK.value] if keys.REMARK.value in jsonBody else ''
+        jsonBody[keys.REMARK] if keys.REMARK in jsonBody else ''
     )
 
-    return 'Successful', 200
+    return response.success_creation()
 
 @app.route('/api/quiz', methods=['PUT'])
 def updateQuiz():
-    authorized = True
-    username = 'Sha'
-
-    if not authorized:
-        return 'Authorization failed', 401
+    username = getUser()
+    jsonBody = request.json
     
-    content_type = request.headers.get('Content-Type')
-    
-    if (content_type != 'application/json'):
-        return 'Content-Type not supported!'
-
-    jsonBody = request.json 
-
-    if jsonBody is None:
-        return 'Bad request due to wrong parameter', 400
-    
-    if keys.QUIZ_ID.value not in jsonBody:
-        return 'Bad request due to missing/wrong key', 400
+    if keys.QUIZ_ID not in jsonBody:
+        return response.wrong_key()
 
     dynamodb_handler.updateQuiz(
         username,
-        jsonBody[keys.QUIZ_ID.value],
+        jsonBody[keys.QUIZ_ID],
         jsonBody
     )
         
-    return 'Successful', 200
+    return response.success_update()
 
 @app.route('/api/quiz', methods=['DELETE'])
 def deleteQuiz():
-    authorized = True
-    username = 'Sha'
-
-    if not authorized:
-        return 'Authorization failed', 401
-    
-    content_type = request.headers.get('Content-Type')
-    
-    if (content_type != 'application/json'):
-        return 'Content-Type not supported!'
-
+    username = getUser()
     jsonBody = request.json 
 
-    if jsonBody is None:
-        return 'Bad request due to wrong parameter', 400
-    
-    if keys.QUIZ_ID.value not in jsonBody:
-        return 'Bad request due to missing/wrong key', 400
+    if keys.QUIZ_ID not in jsonBody:
+        return response.wrong_key()
 
-    dynamodb_handler.deleteQuiz(
+    output = dynamodb_handler.deleteQuiz(
         username,
-        jsonBody[keys.QUIZ_ID.value],
+        jsonBody[keys.QUIZ_ID],
     )
-        
-    return 'Successful', 200
+
+    if status.ERROR in output: 
+        return response.custom_error_message(output[status.ERROR])
+    
+    return response.success_remove()
 
 @app.route('/api/quiz/question', methods=['POST'])
 def addQuestion():
-    authorized = True
-    username = 'Sha'
-
-    if not authorized:
-        return 'Authorization failed', 401
-    
-    content_type = request.headers.get('Content-Type')
-    
-    if (content_type != 'application/json'):
-        return 'Content-Type not supported!'
-
+    username = getUser()
     jsonBody = request.json 
 
-    if jsonBody is None:
-        return 'Bad request due to wrong parameter', 400
-    
-    if keys.QUIZ_ID.value not in jsonBody or \
-        keys.QUESTION.value not in jsonBody or \
-        keys.INDEX.value not in jsonBody or \
-        keys.OPTIONS.value not in jsonBody or \
-        keys.ANSWER.value not in jsonBody:
-        return 'Bad request due to missing/wrong key', 400
+    if keys.QUIZ_ID not in jsonBody or \
+        keys.QUESTION not in jsonBody or \
+        keys.INDEX not in jsonBody or \
+        keys.OPTIONS not in jsonBody or \
+        keys.ANSWER not in jsonBody:
+        return response.wrong_key()
 
-    import hashlib
-    from datetime import datetime
-    s = str(jsonBody[keys.INDEX.value]) + str(datetime.now().timestamp())
-    question_id = hashlib.shake_256(s.encode('utf-8')).hexdigest(2)
+    question_id = genHash(jsonBody[keys.INDEX], 4)
 
     dynamodb_handler.addQuestion(
         username,
-        jsonBody.pop(keys.QUIZ_ID.value),
+        jsonBody.pop(keys.QUIZ_ID),
         question_id,
         jsonBody
     )
 
-    return 'Successful', 200
+    return response.success_creation()
 
 @app.route('/api/quiz/question', methods=['PUT'])
 def updateQuestion():
-    authorized = True
-    username = 'Sha'
-
-    if not authorized:
-        return 'Authorization failed', 401
-    
-    content_type = request.headers.get('Content-Type')
-    
-    if (content_type != 'application/json'):
-        return 'Content-Type not supported!'
-
+    username = getUser()
     jsonBody = request.json 
 
-    if jsonBody is None:
-        return 'Bad request due to wrong parameter', 400
-    
-    if keys.QUIZ_ID.value not in jsonBody or \
-        keys.QUESTION_ID.value not in jsonBody:
-        return 'Bad request due to missing/wrong key', 400
+    if keys.QUIZ_ID not in jsonBody or \
+        keys.QUESTION_ID not in jsonBody:
+        return response.wrong_key()
     
     dynamodb_handler.updateQuestion(
         username,
-        jsonBody[keys.QUIZ_ID.value],
+        jsonBody[keys.QUIZ_ID],
         jsonBody
     )
 
-    return 'Successful', 200
+    return response.success_update()
 
 @app.route('/api/quiz/question', methods=['DELETE'])
 def deleteQuestion():
-    authorized = True
-    username = 'Sha'
-
-    if not authorized:
-        return 'Authorization failed', 401
-    
-    content_type = request.headers.get('Content-Type')
-    
-    if (content_type != 'application/json'):
-        return 'Content-Type not supported!'
-
+    username = getUser()
     jsonBody = request.json 
 
-    if jsonBody is None:
-        return 'Bad request due to wrong parameter', 400
-    
-    if keys.QUIZ_ID.value not in jsonBody or \
-        keys.QUESTION_ID.value not in jsonBody:
-        return 'Bad request due to missing/wrong key', 400
+    if keys.QUIZ_ID not in jsonBody or \
+        keys.QUESTION_ID not in jsonBody:
+        return response.wrong_key()
     
     dynamodb_handler.deleteQuestion(
         username,
-        jsonBody[keys.QUIZ_ID.value],
-        jsonBody[keys.QUESTION_ID.value]
+        jsonBody[keys.QUIZ_ID],
+        jsonBody[keys.QUESTION_ID]
     )
 
-    return 'Successful', 200
+    return response.success_remove()
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0')
+    app.run(host='0.0.0.0', port=5050)

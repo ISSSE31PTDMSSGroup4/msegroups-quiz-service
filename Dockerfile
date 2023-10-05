@@ -7,7 +7,7 @@ WORKDIR /app
 ADD requirements.txt /app
 RUN pip install -r requirements.txt
 ADD . /app
-EXPOSE 5000
+EXPOSE 5050
 
 # Run quiz.py when the container launches
 CMD ["python", "quiz.py"]
