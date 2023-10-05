@@ -1,7 +1,7 @@
 import boto3
 from decouple import config
-import HTTPConst.response.status as status
-import HTTPConst.request.keys as keys
+import HTTP.const.response.status as status
+import HTTP.const.request.keys as keys
 
 AWS_ACCESS_KEY_ID     = config("AWS_ACCESS_KEY_ID")
 AWS_SECRET_ACCESS_KEY = config("AWS_SECRET_ACCESS_KEY")

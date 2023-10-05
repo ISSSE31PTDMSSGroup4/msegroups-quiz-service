@@ -1,5 +1,5 @@
-import HTTPConst.response.code as code
-import HTTPConst.response.status as status
+import HTTP.const.response.code as code
+import HTTP.const.response.status as status
 
 def auth_custom_error_message(message):
     return {
