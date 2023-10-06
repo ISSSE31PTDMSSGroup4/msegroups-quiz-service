@@ -1,15 +1,10 @@
 from flask import Blueprint
-# from flask import request
-import utils.dynamodb_handler as dynamodb_handler
+from utils import dynamodb_handler
 
 import HTTP.const.request.keys as keys
 import HTTP.utils.request as request
 
-# Defining a blueprint
 list = Blueprint('list', __name__)
-
-# def getUser():
-#     return request.headers.get('X-USER')
 
 @list.route('/api/quiz/list/', methods=['GET'])
 def getQuizzesCreatedByUser():

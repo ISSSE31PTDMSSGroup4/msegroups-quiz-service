@@ -22,6 +22,9 @@ def custom_success_message(message):
         'message': message
     }
 
+def unsupported_content_type():
+    return custom_error_message('Content-Type not supported!')
+
 def auth_failed():
     return auth_custom_error_message('Authorization failed')
 

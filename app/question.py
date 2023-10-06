@@ -1,23 +1,11 @@
 from flask import Blueprint
-import utils.dynamodb_handler as dynamodb_handler
-# from flask import request
-
-import hashlib
-from datetime import datetime
+from utils import dynamodb_handler, identifier
 
 import HTTP.const.request.keys as keys
 import HTTP.utils.response as response
 import HTTP.utils.request as request
 
-# Defining a blueprint
 question = Blueprint('question', __name__)
-
-# def getUser():
-#     return request.headers.get('X-USER')
-
-def genHash(value, length):
-    s = str(value) + str(datetime.now().timestamp())
-    return hashlib.shake_256(s.encode('utf-8')).hexdigest(length//2)
 
 @question.route('/api/quiz/question', methods=['POST'])
 def addQuestion():
@@ -31,7 +19,7 @@ def addQuestion():
         keys.ANSWER not in jsonBody:
         return response.wrong_key()
 
-    question_id = genHash(jsonBody[keys.INDEX], 4)
+    question_id = identifier.genHash(jsonBody[keys.INDEX], 4)
 
     dynamodb_handler.addQuestion(
         username,

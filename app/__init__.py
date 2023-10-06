@@ -1,5 +1,4 @@
 from flask import Flask
-# from flask import request
 
 from .quiz import quiz
 from .question import question
@@ -11,14 +10,10 @@ import HTTP.utils.request as request
 
 app = Flask(__name__)
 
-# Registering blueprints
 app.register_blueprint(question)
 app.register_blueprint(quiz)
 app.register_blueprint(list)
 app.register_blueprint(detail)
-
-# def getUser():
-#     return request.headers.get('X-USER')
 
 @app.before_request
 def validateRequest():
@@ -29,7 +24,7 @@ def validateRequest():
         return
     
     if not request.isBodyFormatSupported():
-        return 'Content-Type not supported!'
+        return response.unsupported_content_type()
 
     if request.isWithEmptyBody():
         return response.wrong_param()

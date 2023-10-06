@@ -7,7 +7,5 @@ WORKDIR /app
 ADD requirements.txt /app
 RUN pip install -r requirements.txt
 ADD . /app
-EXPOSE 5050
 
-# Run quiz.py when the container launches
-CMD ["python", "quiz.py"]
+CMD ["flask", "run", "--host=0.0.0.0", "--port=5050"]

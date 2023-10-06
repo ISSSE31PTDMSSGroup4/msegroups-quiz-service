@@ -14,7 +14,7 @@ resource = boto3.resource(
     region_name           = REGION_NAME,
 )
 
-dynamodb = boto3.client('dynamodb')
+dynamodb = boto3.client('dynamodb', region_name=REGION_NAME)
 QuizTable = resource.Table('Quiz')
 
 def getQuizzesByUsername(username):

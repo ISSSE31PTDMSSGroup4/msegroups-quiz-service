@@ -1,21 +1,16 @@
 from flask import Blueprint
-# from flask import request
-import utils.dynamodb_handler as dynamodb_handler
+from utils import dynamodb_handler
 
 import HTTP.const.request.keys as keys
 import HTTP.utils.request as request
 
-# Defining a blueprint
 detail = Blueprint('detail', __name__)
-
-# def getUser():
-#     return request.headers.get('X-USER')
 
 @detail.route("/api/quiz/detail", methods=['GET'])
 def getQuizDetail():
     username = request.getUser()
     quiz_id = request.getQuizId()
-    
+
     quiz = dynamodb_handler.getQuiz(username, quiz_id)
 
     quiz.pop(keys.USERNAME)
