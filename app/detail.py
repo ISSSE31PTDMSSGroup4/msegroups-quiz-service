@@ -6,7 +6,7 @@ import HTTP.utils.request as request
 
 detail = Blueprint('detail', __name__)
 
-@detail.route("/api/quiz/detail", methods=['GET'])
+@detail.route("/api/quiz/detail/", methods=['GET'])
 def getQuizDetail():
     username = request.getUser()
     quiz_id = request.getQuizId()

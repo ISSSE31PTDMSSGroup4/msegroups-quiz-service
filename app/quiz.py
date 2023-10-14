@@ -8,7 +8,7 @@ import HTTP.utils.request as request
 
 quiz = Blueprint('quiz', __name__)
 
-@quiz.route('/api/quiz', methods=['POST'])
+@quiz.route('/api/quiz/', methods=['POST'])
 def createQuiz():
     username = request.getUser()
     jsonBody = request.getJsonBody() 
@@ -34,7 +34,7 @@ def createQuiz():
 
     return response.success_creation()
 
-@quiz.route('/api/quiz', methods=['PUT'])
+@quiz.route('/api/quiz/', methods=['PUT'])
 def updateQuiz():
     username = request.getUser()
     jsonBody = request.getJsonBody() 
@@ -50,7 +50,7 @@ def updateQuiz():
         
     return response.success_update()
 
-@quiz.route('/api/quiz', methods=['DELETE'])
+@quiz.route('/api/quiz/', methods=['DELETE'])
 def deleteQuiz():
     username = request.getUser()
     jsonBody = request.getJsonBody() 
