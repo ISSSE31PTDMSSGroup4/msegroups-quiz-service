@@ -1,4 +1,5 @@
 from flask import Flask
+from flask_cors import CORS
 
 from .quiz import quiz
 from .question import question
@@ -9,6 +10,7 @@ import HTTP.utils.response as response
 import HTTP.utils.request as request
 
 app = Flask(__name__)
+CORS(app)
 
 app.register_blueprint(question)
 app.register_blueprint(quiz)
