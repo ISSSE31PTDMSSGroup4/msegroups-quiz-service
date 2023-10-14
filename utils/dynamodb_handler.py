@@ -1,20 +1,22 @@
+import os
 import boto3
 from decouple import config
 import HTTP.const.response.status as status
 import HTTP.const.request.keys as keys
 
-AWS_ACCESS_KEY_ID     = config("AWS_ACCESS_KEY_ID")
-AWS_SECRET_ACCESS_KEY = config("AWS_SECRET_ACCESS_KEY")
-REGION_NAME           = config("REGION_NAME")
+AWS_ACCESS_KEY_ID     = os.getenv("AWS_ACCESS_KEY_ID")
+AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
+REGION_NAME           = 'ap-southeast-1'
+CLIENT_NAME           = 'dynamodb'
 
 resource = boto3.resource(
-    'dynamodb',
+    CLIENT_NAME,
     aws_access_key_id     = AWS_ACCESS_KEY_ID,
     aws_secret_access_key = AWS_SECRET_ACCESS_KEY,
     region_name           = REGION_NAME,
 )
 
-dynamodb = boto3.client('dynamodb', region_name=REGION_NAME)
+dynamodb = boto3.client(CLIENT_NAME, region_name=REGION_NAME)
 QuizTable = resource.Table('Quiz')
 
 def getQuizzesByUsername(username):
