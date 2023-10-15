@@ -3,8 +3,8 @@ import HTTP.const.response.code as code
 import HTTP.const.response.status as status
 
 def allow_cors_policy(response):
-    response.headers.add('Access-Control-Allow-Origin', '')
-    response.headers.add('Access-Control-Allow-Headers', '')
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Headers', '*')
     response.headers.add('Access-Control-Allow-Methods', '*')
     return response
 
