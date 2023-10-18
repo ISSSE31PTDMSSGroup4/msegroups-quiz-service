@@ -4,6 +4,7 @@ from utils import dynamodb_handler, identifier
 import HTTP.const.request.keys as keys
 import HTTP.utils.response as response
 import HTTP.utils.request as request
+import HTTP.const.response.status as status
 
 question = Blueprint('question', __name__)
 
@@ -21,12 +22,15 @@ def addQuestion():
 
     question_id = identifier.genHash(jsonBody[keys.INDEX], 4)
 
-    dynamodb_handler.addQuestion(
+    output = dynamodb_handler.addQuestion(
         username,
-        jsonBody.pop(keys.QUIZ_ID),
+        str(jsonBody.pop(keys.QUIZ_ID)),
         question_id,
         jsonBody
     )
+
+    if status.ERROR in output: 
+        return response.custom_error_message(output[status.ERROR])
 
     return response.success_creation()
 
@@ -39,11 +43,14 @@ def updateQuestion():
         keys.QUESTION_ID not in jsonBody:
         return response.wrong_key()
     
-    dynamodb_handler.updateQuestion(
+    output = dynamodb_handler.updateQuestion(
         username,
-        jsonBody[keys.QUIZ_ID],
+        str(jsonBody[keys.QUIZ_ID]),
         jsonBody
     )
+
+    if status.ERROR in output: 
+        return response.custom_error_message(output[status.ERROR])
 
     return response.success_update()
 
@@ -56,10 +63,13 @@ def deleteQuestion():
         keys.QUESTION_ID not in jsonBody:
         return response.wrong_key()
     
-    dynamodb_handler.deleteQuestion(
+    output = dynamodb_handler.deleteQuestion(
         username,
         jsonBody[keys.QUIZ_ID],
         jsonBody[keys.QUESTION_ID]
     )
+
+    if status.ERROR in output: 
+        return response.custom_error_message(output[status.ERROR])
 
     return response.success_remove()

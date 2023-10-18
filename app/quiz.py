@@ -42,12 +42,15 @@ def updateQuiz():
     if keys.QUIZ_ID not in jsonBody:
         return response.wrong_key()
 
-    dynamodb_handler.updateQuiz(
+    output = dynamodb_handler.updateQuiz(
         username,
-        jsonBody[keys.QUIZ_ID],
+        str(jsonBody[keys.QUIZ_ID]),
         jsonBody
     )
-        
+
+    if status.ERROR in output: 
+        return response.custom_error_message(output[status.ERROR])
+  
     return response.success_update()
 
 @quiz.route('/api/quiz/', methods=['DELETE'])
@@ -60,7 +63,7 @@ def deleteQuiz():
 
     output = dynamodb_handler.deleteQuiz(
         username,
-        jsonBody[keys.QUIZ_ID],
+        str(jsonBody[keys.QUIZ_ID]),
     )
 
     if status.ERROR in output: 

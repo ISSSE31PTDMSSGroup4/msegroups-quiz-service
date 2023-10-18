@@ -3,6 +3,8 @@ from utils import dynamodb_handler
 
 import HTTP.const.request.keys as keys
 import HTTP.utils.request as request
+import HTTP.const.response.status as status
+import HTTP.utils.response as response
 
 detail = Blueprint('detail', __name__)
 
@@ -12,6 +14,9 @@ def getQuizDetail():
     quiz_id = request.getQuizId()
 
     quiz = dynamodb_handler.getQuiz(username, quiz_id)
+
+    if status.ERROR in quiz: 
+        return response.custom_error_message(quiz[status.ERROR])
 
     quiz.pop(keys.USERNAME)
 
