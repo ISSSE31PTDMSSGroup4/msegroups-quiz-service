@@ -18,7 +18,6 @@ def getQuizzesCreatedByUser():
 
     for quiz in quizzes:
         quiz.pop(keys.USERNAME)
-        print (quiz[keys.QUESTIONS])
         question_list = []
         for question_id in quiz[keys.QUESTIONS]:
             question_list.append(

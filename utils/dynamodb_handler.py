@@ -18,6 +18,7 @@ resource = boto3.resource(
 
 dynamodb = boto3.client(CLIENT_NAME, region_name=REGION_NAME)
 QuizTable = resource.Table('Quiz')
+QuizIdIndex = keys.QUIZ_ID+"-index"
 
 def getQuizzesByUsername(username):
     response = QuizTable.query(
@@ -33,17 +34,25 @@ def getQuizzesByUsername(username):
 
     return response["Items"]
 
-def getQuiz(username, quiz_id):
-    response = QuizTable.get_item(
-        Key={keys.USERNAME: username, keys.QUIZ_ID: quiz_id}
+def getQuizByQuizId(quiz_id):
+    response = QuizTable.query(
+        IndexName=QuizIdIndex,
+        KeyConditionExpression="#quiz_id = :quiz_id",
+        ExpressionAttributeNames = {"#quiz_id" : keys.QUIZ_ID},
+        ExpressionAttributeValues = {":quiz_id" : quiz_id},
     )
 
-    if "Item" not in response:
+    if len(response["Items"]) < 1:
         return {
-            status.ERROR: 'Quiz '+quiz_id+' is not found for user '+username
+            status.ERROR: 'Quiz '+quiz_id+' is not found'
+        }
+    
+    if len(response["Items"]) > 1:
+        return {
+            status.ERROR: 'Quiz '+quiz_id+' has duplicate records'
         }
 
-    return response["Item"]
+    return response["Items"][0]
 
 def addNewQuiz(username, quiz_id, title, questions, remark):
     return QuizTable.put_item(
