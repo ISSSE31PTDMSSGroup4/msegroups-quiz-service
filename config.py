@@ -11,8 +11,8 @@ class ProductionConfig(Config):
 
 class TestingConfig(Config):
     TESTING               = True
-    AWS_ACCESS_KEY_ID     = None
-    AWS_SECRET_ACCESS_KEY = None
+    AWS_ACCESS_KEY_ID     = os.getenv("AWS_ACCESS_KEY_ID")
+    AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
     DYNAMODB_LOCAL_PORT   = 8000 # fixed port used by dynamodb-local [Dockerfile provided by AWS]
     DYNAMODB_ENDPOINT_URL = f'http://localhost:{DYNAMODB_LOCAL_PORT}'  # Local DynamoDB for testing
 

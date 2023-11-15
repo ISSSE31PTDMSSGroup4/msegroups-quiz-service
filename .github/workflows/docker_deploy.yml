@@ -26,9 +26,6 @@ jobs:
           flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
       - name: Test with pytest
         run: pytest
-        env:
-          AWS_ACCESS_KEY_ID: 'DUMMYIDEXAMPLE'
-          AWS_SECRET_ACCESS_KEY: 'DUMMYEXAMPLEKEY'
 
   docker:
     runs-on: ubuntu-latest
