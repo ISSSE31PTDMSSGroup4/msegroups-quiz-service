@@ -16,18 +16,18 @@ def client(monkeypatch):
 
 @pytest.fixture(scope='session', autouse=True)
 def create_quiz_table():
-    # client = docker.from_env()
-    # dynamodb_container = client.containers.run(
-    #     "amazon/dynamodb-local", # Dockerfile provided by AWS
-    #     detach=True,
-    #     ports={f"{TestingConfig.DYNAMODB_LOCAL_PORT}/tcp": TestingConfig.DYNAMODB_LOCAL_PORT},
-    #     remove=True,
-    # )
+    client = docker.from_env()
+    dynamodb_container = client.containers.run(
+        "amazon/dynamodb-local", # Dockerfile provided by AWS
+        detach=True,
+        ports={f"{TestingConfig.DYNAMODB_LOCAL_PORT}/tcp": TestingConfig.DYNAMODB_LOCAL_PORT},
+        remove=True,
+    )
 
     # Start DynamoDB Local
-    subprocess.Popen(
-        ["java", "-Djava.library.path=tests\dynamodb\DynamoDBLocal_lib", "-jar", "tests\dynamodb\DynamoDBLocal.jar", "-sharedDb","-port", "5051"]
-    )
+    # subprocess.Popen(
+    #     ["java", "-Djava.library.path=tests\dynamodb\DynamoDBLocal_lib", "-jar", "tests\dynamodb\DynamoDBLocal.jar", "-sharedDb","-port", "5051"]
+    # )
 
     db_client = boto3.client('dynamodb',endpoint_url= TestingConfig.DYNAMODB_ENDPOINT_URL)
     table_schema = {
@@ -71,4 +71,4 @@ def create_quiz_table():
     yield table
 
     # Teardown: Stop DynamoDB Local Docker container
-    # dynamodb_container.stop()
+    dynamodb_container.stop()
