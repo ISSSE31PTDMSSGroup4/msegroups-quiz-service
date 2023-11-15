@@ -5,8 +5,8 @@ from config import TestingConfig
 
 @pytest.fixture
 def client(monkeypatch):
-    monkeypatch.setenv("AWS_ACCESS_KEY_ID", "DUMMYIDEXAMPLE")
-    monkeypatch.setenv("AWS_SECRET_ACCESS_KEY", "DUMMYEXAMPLEKEY")
+    # monkeypatch.setenv("AWS_ACCESS_KEY_ID", "")
+    # monkeypatch.setenv("AWS_SECRET_ACCESS_KEY", "")
     monkeypatch.setenv("ENVIRONMENT", "testing") # config.py
 
     from app import app
