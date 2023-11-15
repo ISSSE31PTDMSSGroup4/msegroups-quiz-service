@@ -5,34 +5,18 @@ from config import get_config
 import HTTP.const.response.status as status
 import HTTP.const.request.keys as keys
 
-AWS_ACCESS_KEY_ID     = os.getenv("AWS_ACCESS_KEY_ID")
-AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
 ENVIRONMENT           = os.getenv("ENVIRONMENT")
-
 CLIENT_NAME           = 'dynamodb'
 REGION_NAME           = 'ap-southeast-1'
 
 config = get_config(ENVIRONMENT)
 
-if ENVIRONMENT == 'testing':
-    print('ENVIRONMENT = ',ENVIRONMENT)
-    resource = boto3.resource(
-        CLIENT_NAME,
-        aws_access_key_id     = None, #config.AWS_ACCESS_KEY_ID,
-        aws_secret_access_key = None, #config.AWS_SECRET_ACCESS_KEY,
-        region_name           = REGION_NAME,
-    )
-    # None, #
-        
-if ENVIRONMENT == 'production':
-    print('ENVIRONMENT = ',ENVIRONMENT)
-    resource = boto3.resource(
-        CLIENT_NAME,
-        aws_access_key_id     = AWS_ACCESS_KEY_ID, #config.AWS_ACCESS_KEY_ID,
-        aws_secret_access_key = AWS_SECRET_ACCESS_KEY, #config.AWS_SECRET_ACCESS_KEY,
-        region_name           = REGION_NAME,
-    )
-
+resource = boto3.resource(
+    CLIENT_NAME,
+    aws_access_key_id     = config.AWS_ACCESS_KEY_ID,
+    aws_secret_access_key = config.AWS_SECRET_ACCESS_KEY,
+    region_name           = REGION_NAME,
+)
 dynamodb = boto3.client(
     CLIENT_NAME, 
     region_name=REGION_NAME, 
