@@ -5,6 +5,17 @@ on:
     branches:
       - 'main'
 jobs:
+  create-envfile:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Make envfile
+      uses: SpicyPizza/create-envfile@v1
+      with:
+        envkey_AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        envkey_AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        envkey_ENVIRONMENT: 'production'
+        file_name: quiz.env
+
   test:
     runs-on: ubuntu-latest
     steps:
