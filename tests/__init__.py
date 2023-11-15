@@ -22,11 +22,6 @@ def create_quiz_table():
         remove=True,
     )
 
-    # Start DynamoDB Local
-    # subprocess.Popen(
-    #     ["java", "-Djava.library.path=tests\dynamodb\DynamoDBLocal_lib", "-jar", "tests\dynamodb\DynamoDBLocal.jar", "-sharedDb","-port", "5051"]
-    # )
-
     db_client = boto3.client('dynamodb',endpoint_url= TestingConfig.DYNAMODB_ENDPOINT_URL)
     table_schema = {
         'TableName':"Quiz",

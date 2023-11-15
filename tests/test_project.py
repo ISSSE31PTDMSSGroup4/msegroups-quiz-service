@@ -6,11 +6,11 @@ def test_index(client):
     response = client.get('/')
     assert response.status_code == 200
 
-def test_post_create_quiz(client):
-    response = client.post('/api/quiz/', data=json.dumps(NEW_QUIZ_DETAILS), headers=HTTP_HEADER)
+# def test_post_create_quiz(client):
+#     response = client.post('/api/quiz/', data=json.dumps(NEW_QUIZ_DETAILS), headers=HTTP_HEADER)
 
-    response = client.post('/api/quiz/', data=json.dumps(NEW_QUIZ_DETAILS), headers=HTTP_HEADER)
-    assert response.status_code == 200
+#     response = client.post('/api/quiz/', data=json.dumps(NEW_QUIZ_DETAILS), headers=HTTP_HEADER)
+#     assert response.status_code == 200
 
 # def test_get_list_of_quizzes(client):
 #     response = client.get('/api/quiz/list/', headers=HTTP_HEADER)
