@@ -3,3 +3,4 @@ docker_py==1.10.6
 Flask==2.2.3
 Flask_Cors==4.0.0
 pytest==7.2.2
+Werkzeug==2.2.3
