@@ -10,7 +10,7 @@ REGION_NAME           = 'ap-southeast-1'
 ENVIRONMENT           = os.getenv("ENVIRONMENT")
 
 config = get_config(ENVIRONMENT)
-
+print(ENVIRONMENT)
 resource = boto3.resource(
     CLIENT_NAME,
     aws_access_key_id     = config.AWS_ACCESS_KEY_ID,
