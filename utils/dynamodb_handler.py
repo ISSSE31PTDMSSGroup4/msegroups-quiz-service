@@ -1,22 +1,28 @@
 import os
 import boto3
-from decouple import config
+from config import get_config
+
 import HTTP.const.response.status as status
 import HTTP.const.request.keys as keys
 
-AWS_ACCESS_KEY_ID     = os.getenv("AWS_ACCESS_KEY_ID")
-AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
-REGION_NAME           = 'ap-southeast-1'
 CLIENT_NAME           = 'dynamodb'
+REGION_NAME           = 'ap-southeast-1'
+ENVIRONMENT           = os.getenv("ENVIRONMENT")
+
+config = get_config(ENVIRONMENT)
 
 resource = boto3.resource(
     CLIENT_NAME,
-    aws_access_key_id     = AWS_ACCESS_KEY_ID,
-    aws_secret_access_key = AWS_SECRET_ACCESS_KEY,
+    aws_access_key_id     = config.AWS_ACCESS_KEY_ID,
+    aws_secret_access_key = config.AWS_SECRET_ACCESS_KEY,
     region_name           = REGION_NAME,
 )
+dynamodb = boto3.client(
+    CLIENT_NAME, 
+    region_name=REGION_NAME, 
+    endpoint_url=config.DYNAMODB_ENDPOINT_URL
+)
 
-dynamodb = boto3.client(CLIENT_NAME, region_name=REGION_NAME)
 QuizTable = resource.Table('Quiz')
 QuizIdIndex = keys.QUIZ_ID+"-index"
 
